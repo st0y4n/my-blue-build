@@ -19,6 +19,10 @@ set -oue pipefail
 mkdir -p /var/tmp
 chmod 1777 /var/tmp
 
+# Fix Fedora 44's missing legacy cert path
+mkdir -p /etc/pki/tls/certs
+ln -sf /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt
+
 ##################################
 # Repository setup
 ##################################
