@@ -15,7 +15,7 @@
 enroll-secure-boot-key:
     #!/usr/bin/bash
     ENROLLMENT_PASSWORD="bluebuild"
-    SECUREBOOT_KEY=/etc/pki/akmods/certs/akmods-blue-build.der
+    SECUREBOOT_KEY=/etc/pki/akmods/certs/my-custom-os.der
     sudo mokutil --timeout -1
     echo -e "$ENROLLMENT_PASSWORD\n$ENROLLMENT_PASSWORD" | sudo mokutil --import "$SECUREBOOT_KEY"
     echo 'At next reboot, the mokutil UEFI menu UI will be displayed (*QWERTY* keyboard input and navigation).\nThen, select "Enroll MOK", and input "bluebuild" as the password'

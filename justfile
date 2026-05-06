@@ -1,6 +1,6 @@
 export BB_REGISTRY := "ghcr.io"
-export BB_REGISTRY_NAMESPACE := "blue-build"
-export BB_GENISO_SECURE_BOOT_URL := "https://github.com/blue-build/base-images/raw/main/files/base/etc/pki/akmods/certs/akmods-blue-build.der"
+export BB_REGISTRY_NAMESPACE := "st0y4n"
+export BB_GENISO_SECURE_BOOT_URL := "https://github.com/st0y4n/my-blue-build/raw/main/files/base/etc/pki/akmods/certs/my-custom-os.der"
 export BB_GENISO_ENROLLMENT_PASSWORD := "bluebuild"
 export BB_GENISO_VARIANT := "kinoite"
 
@@ -38,4 +38,4 @@ generate-secureboot-key:
         -new -x509 -newkey rsa:2048 \
         -nodes -days 36500 -outform DER \
         -keyout ./MOK.priv \
-        -out ./files/base/etc/pki/akmods/certs/akmods-blue-build.der
+        -out ./files/base/etc/pki/akmods/certs/my-custom-os.der
