@@ -90,6 +90,7 @@ modules:
       packages:
         - bootc
         - ublue-os-udev-rules
+        - ublue-os-libvirt-workarounds
         - fedora-repos-archive
         - zstd
         - sbsign
@@ -162,6 +163,10 @@ modules:
         packages:
           - new: ocl-icd
             old: OpenCL-ICD-Loader
+    group-install:
+        with-optional: true
+        packages:
+        -   virtualization
 
   - type: script
     env:
@@ -175,3 +180,5 @@ modules:
       - rm -f /etc/yum.repos.d/fedora-negativo17.repo
     scripts:
       - install-appimage-thumbnailer.sh
+
+  - type: brew
