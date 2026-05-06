@@ -4,7 +4,6 @@ image-version: 42
 description: Reference implementation and base images for BlueBuild.
 platforms:
 - linux/amd64
-- linux/arm64
 alt-tags:
 - gts
 modules:
