@@ -9,9 +9,9 @@ string_mask             = utf8only
 prompt                  = no
 
 [ req_distinguished_name ]
-0.organizationName      = blue-build
-commonName              = BlueBuild
-emailAddress            = gmpinder@gmail.com
+0.organizationName      = my-blue-build
+commonName              = MyBlueBuild
+emailAddress            = stoyang2005@gmail.com
 
 [ v3 ]
 subjectKeyIdentifier    = hash
