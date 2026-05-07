@@ -11,6 +11,7 @@ modules:
         - gvfs-nfs
         - ibus-unikey
         - ibus-mozc
+        - gnome-tweaks
     remove:
       auto-remove: false
       packages:
