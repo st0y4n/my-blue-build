@@ -150,6 +150,7 @@ modules:
         - wine-core
         - wine-pulseaudio
         - cabextract
+        - kvantum
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
