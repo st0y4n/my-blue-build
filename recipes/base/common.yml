@@ -146,6 +146,10 @@ modules:
         - gvfs-smb
         - gvfs-nfs
         - gvfs-mtp
+        - lutris
+        - wine-core
+        - wine-pulseaudio
+        - cabextract
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
@@ -180,5 +184,6 @@ modules:
       - rm -f /etc/yum.repos.d/fedora-negativo17.repo
     scripts:
       - install-appimage-thumbnailer.sh
+      - install-winetricks.sh
 
   - type: brew
