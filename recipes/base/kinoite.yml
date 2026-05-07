@@ -20,6 +20,7 @@ modules:
         - kio-admin
         - ksshaskpass
         - qt6-qtimageformats
+        - kvantum
       exclude:
         - ffmpegthumbnailer
         - plasma-discover-rpm-ostree
