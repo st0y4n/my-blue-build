@@ -74,6 +74,7 @@ jobs:
           skip_checkout: true
           # rechunking
           # rechunk: false
+          rechunk_clear_plan: true
           build_chunked_oci: true
           max_layers: 64
 
