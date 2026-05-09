@@ -35,6 +35,7 @@ jobs:
           - fedora-kinoite-latest.yml
           - fedora-kinoite-nvidia-latest.yml
           - fedora-kinoite-nvidia-open-latest.yml
+          - fedora-kinoite-nvidia-latest-cachy.yml
 
           # Fedora GTS
           - fedora-base-gts.yml

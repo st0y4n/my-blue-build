@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+name: base-images/fedora-kinoite-nvidia-cachy
+description: Reference implementation and base images for BlueBuild.
+base-image: quay.io/fedora-ostree-desktops/kinoite
+image-version: 44
+platforms:
+  - linux/amd64
+modules:
+  - from-file: base/common.yml
+  - from-file: base/kinoite.yml
+  - type: os-release
+    properties:
+      PRETTY_NAME: Kinoite Cachy
+  - type: script
+    env:
+      PUBLIC_KEY_DER_PATH: /etc/pki/akmods/certs/my-custom-os.der
+    secrets:
+      - type: file
+        source: ./MOK.priv
+        mount: 
+          type: file
+          destination: /tmp/certs/private_key.priv
+    scripts:
+      - custom-kernel.sh
+  - type: initramfs
+    env:
+      DRACUT_NO_XATTR: '1'
