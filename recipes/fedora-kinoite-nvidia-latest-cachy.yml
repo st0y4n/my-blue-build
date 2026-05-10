@@ -9,9 +9,33 @@ platforms:
 modules:
   - from-file: base/common.yml
   - from-file: base/kinoite.yml
+
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
+        - bieszczaders/kernel-cachyos-addons
+    install:
+      packages:
+        - cachyos-settings
+        - scx-scheds
+        - scx-manager
+        - scx-tools
+        - ananicy-cpp
+    remove:
+      auto-remove: true
+      packages:
+        - zram-generator-defaults
+  - type: systemd
+    system:
+      enabled:
+        - ananicy-cpp.service
   - type: os-release
     properties:
       PRETTY_NAME: Kinoite Cachy
+  - type: script
+    scripts:
+      - adios-ioscheduler.sh
   - type: script
     env:
       PUBLIC_KEY_DER_PATH: /etc/pki/akmods/certs/my-custom-os.der
