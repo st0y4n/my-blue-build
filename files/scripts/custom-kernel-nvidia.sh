@@ -9,15 +9,27 @@ echo "=== STARTING CACHYOS + NVIDIA + SECURE BOOT SETUP ==="
 KERNEL_TYPE="${1:-cachyos-lto}"
 
 case "${KERNEL_TYPE}" in
-  cachyos-lto)
+cachyos-lto)
     COPR_REPO="bieszczaders/kernel-cachyos-lto"
     KERNEL_PACKAGES="kernel-cachyos-lto kernel-cachyos-lto-core kernel-cachyos-lto-modules kernel-cachyos-lto-devel-matched"
     ;;
-  cachyos)
+cachyos-lts-lto)
+    COPR_REPO="bieszczaders/kernel-cachyos-lto"
+    KERNEL_PACKAGES="kernel-cachyos-lts-lto kernel-cachyos-lts-lto-core kernel-cachyos-lts-lto-modules kernel-cachyos-lts-lto-devel-matched"
+    ;;
+cachyos)
     COPR_REPO="bieszczaders/kernel-cachyos"
     KERNEL_PACKAGES="kernel-cachyos kernel-cachyos-core kernel-cachyos-modules kernel-cachyos-devel-matched"
     ;;
-  *)
+cachyos-rt)
+    COPR_REPO="bieszczaders/kernel-cachyos"
+    KERNEL_PACKAGES="kernel-cachyos-rt kernel-cachyos-rt-core kernel-cachyos-rt-modules kernel-cachyos-rt-devel-matched"
+    ;;
+cachyos-lts)
+    COPR_REPO="bieszczaders/kernel-cachyos"
+    KERNEL_PACKAGES="kernel-cachyos-lts kernel-cachyos-lts-core kernel-cachyos-lts-modules kernel-cachyos-lts-devel-matched"
+    ;;
+*)
     echo "Unsupported kernel type: ${KERNEL_TYPE}"
     exit 1
     ;;
