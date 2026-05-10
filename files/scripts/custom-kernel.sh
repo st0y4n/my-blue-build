@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -oue pipefail
 
-echo "=== STARTING CACHYOS + NVIDIA + SECURE BOOT SETUP ==="
+echo "=== STARTING CACHYOS + SECURE BOOT SETUP ==="
 
 ##################################
 # 1. CACHY KERNEL SETUP
@@ -44,35 +44,11 @@ dnf -y install ${KERNEL_PACKAGES}
 KERNEL_VERSION="$(ls -1 /usr/lib/modules | head -n 1)"
 echo "Active Kernel Version: ${KERNEL_VERSION}"
 
-##################################
-# 2. NVIDIA DRIVER BUILD
-##################################
-if [[ "$IMAGE_NAME" == *open* ]]; then
-    nvidia_repo='fedora-nvidia'
-else
-    nvidia_repo='fedora-nvidia-580'
-fi
-
-curl -fLsS --retry 5 -o "/etc/yum.repos.d/${nvidia_repo}.repo" "https://negativo17.org/repos/${nvidia_repo}.repo"
-
-dnf install -y --setopt=install_weak_deps=False akmods gcc-c++
-
-cp /usr/sbin/akmodsbuild /usr/sbin/akmodsbuild.backup
-sed -i '/if \[\[ -w \/var \]\] ; then/,/fi/d' /usr/sbin/akmodsbuild
-
-dnf install -y --setopt=install_weak_deps=False --enable-repo="${nvidia_repo}" nvidia-kmod-common nvidia-modprobe
-
-echo "Compiling Nvidia kmod against CachyOS..."
-akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
-mv /usr/sbin/akmodsbuild.backup /usr/sbin/akmodsbuild
-
-modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
-    (cat "/var/cache/akmods/nvidia/*.failed.log" && exit 1)
 
 ##################################
-# 3. SECURE BOOT SIGNING
+# 2. SECURE BOOT SIGNING
 ##################################
-echo "Signing Kernel and Nvidia Modules..."
+echo "Signing Kernel Modules..."
 
 PUBLIC_KEY_CRT_PATH="/tmp/certs/public_key.crt"
 PRIVATE_KEY_PATH="/tmp/certs/private_key.priv"
@@ -85,43 +61,9 @@ sbsign --cert "$PUBLIC_KEY_CRT_PATH" --key "$PRIVATE_KEY_PATH" "/usr/lib/modules
 # Prep key for modules
 cat "$PRIVATE_KEY_PATH" <(echo) "$PUBLIC_KEY_CRT_PATH" >> "$SIGNING_KEY"
 
-# Sign Nvidia modules using the CachyOS build path
-for module in /usr/lib/modules/"${KERNEL_VERSION}"/extra/nvidia/*.ko*; do
-  module_basename="${module:0:-3}"
-  module_suffix="${module: -3}"
-  if [[ "$module_suffix" == ".xz" ]]; then
-    xz --decompress "$module"
-    openssl cms -sign -signer "${SIGNING_KEY}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-    /usr/lib/modules/"${KERNEL_VERSION}"/build/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_KEY_CRT_PATH}" "${module_basename}"
-    xz -C crc32 -f "${module_basename}"
-  else
-    openssl cms -sign -signer "${SIGNING_KEY}" -binary -in "$module" -outform DER -out "${module}.cms" -nocerts -noattr -nosmimecap
-    /usr/lib/modules/"${KERNEL_VERSION}"/build/scripts/sign-file -s "${module}.cms" sha256 "${PUBLIC_KEY_CRT_PATH}" "${module}"
-  fi
-done
-
 ##################################
-# 4. NVIDIA USERSPACE & EXTRA TOOLS
+# 3. CLEANUP & RESTORE
 ##################################
-nvidia_packages_list=('nvidia-driver' 'nvidia-persistenced' 'nvidia-settings' 'nvidia-driver-cuda' 'nvidia-container-toolkit' 'libnvidia-fbc' 'libva-nvidia-driver')
-
-curl -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo -o /etc/yum.repos.d/nvidia-container-toolkit.repo
-sed -i 's/^gpgcheck=0/gpgcheck=1/' /etc/yum.repos.d/nvidia-container-toolkit.repo
-
-if ! [ -f /etc/pki/tls/certs/ca-bundle.crt ]; then
-    ln /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt
-fi
-
-dnf -y --setopt=install_weak_deps=False install --enable-repo='nvidia-container-toolkit' --enable-repo="${nvidia_repo}" "${nvidia_packages_list[@]}"
-
-curl -L https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp -o nvidia-container.pp
-semodule -i nvidia-container.pp
-
-##################################
-# 5. CLEANUP & RESTORE
-##################################
-echo "Cleaning up..."
-dnf -y remove akmod-nvidia akmods kernel-headers *-devel-matched gcc-c++ || true
 
 # Restore hooks
 for _f in /usr/lib/kernel/install.d/05-rpmostree.install /usr/lib/kernel/install.d/50-dracut.install; do
@@ -130,9 +72,6 @@ for _f in /usr/lib/kernel/install.d/05-rpmostree.install /usr/lib/kernel/install
     fi
 done
 
-rm -f nvidia-container.pp
-rm -f /etc/yum.repos.d/nvidia-container-toolkit.repo
-rm -f "/etc/yum.repos.d/${nvidia_repo}.repo"
 rm -f /etc/yum.repos.d/*copr*
 
 echo "=== BUILD COMPLETE ==="

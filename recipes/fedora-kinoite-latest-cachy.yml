@@ -32,7 +32,7 @@ modules:
         - ananicy-cpp.service
   - type: os-release
     properties:
-      PRETTY_NAME: Kinoite Cachy Nvidia
+      PRETTY_NAME: Kinoite Cachy
   - type: script
     scripts:
       - adios-ioscheduler.sh
@@ -46,7 +46,7 @@ modules:
           type: file
           destination: /tmp/certs/private_key.priv
     scripts:
-      - custom-kernel-nvidia.sh
+      - custom-kernel.sh
   - type: initramfs
     env:
       DRACUT_NO_XATTR: '1'
