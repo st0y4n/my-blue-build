@@ -72,13 +72,31 @@ chmod +x ./signmodules.sh
 ##################################
 nvidia_packages_list=(\
     'nvidia-driver' \
+    'nvidia-driver-libs.i686' \
     'nvidia-persistenced' \
     'nvidia-settings' \
     'nvidia-driver-cuda' \
+    'nvidia-driver-cuda-libs.i686' \
     'nvidia-container-toolkit' \
+    'libnvidia-ml.i686' \
     'libnvidia-fbc' \
+    'libnvidia-fbc.i686' \
+    'libnvidia-gpucomp.i686' \
     'libva-nvidia-driver' \
 )
+
+
+# nvidia_packages_list=(\
+#     'nvidia-driver' \
+#     'nvidia-persistenced' \
+#     'nvidia-settings' \
+#     'nvidia-driver-cuda' \
+#     'nvidia-container-toolkit' \
+#     'libnvidia-fbc' \
+#     'libva-nvidia-driver' \
+# )
+
+
 
 curl -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
     -o /etc/yum.repos.d/nvidia-container-toolkit.repo
