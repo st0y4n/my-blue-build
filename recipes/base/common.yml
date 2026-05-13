@@ -150,8 +150,6 @@ modules:
         - wine-core
         - wine-pulseaudio
         - cabextract
-        - gamemode.i686
-        - gamemode.x86_64
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
@@ -172,7 +170,9 @@ modules:
     group-install:
         with-optional: true
         packages:
-        -   virtualization
+        - virtualization
+        - gamemode.x86_64
+        - gamemode.i686
 
   - type: script
     env:
