@@ -152,6 +152,7 @@ modules:
         - cabextract
         - gamemode.x86_64
         - gamemode.i686
+        - libglvnd-opengl.i686
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
