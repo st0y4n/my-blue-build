@@ -150,6 +150,8 @@ modules:
         - wine-core
         - wine-pulseaudio
         - cabextract
+        - gamemode.i686
+        - gamemode.x86_64
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
