@@ -115,7 +115,20 @@ done
 ##################################
 # 4. NVIDIA USERSPACE & EXTRA TOOLS
 ##################################
-nvidia_packages_list=('nvidia-driver' 'nvidia-persistenced' 'nvidia-settings' 'nvidia-driver-cuda' 'nvidia-container-toolkit' 'libnvidia-fbc' 'libva-nvidia-driver')
+nvidia_packages_list=(\
+    'nvidia-driver' \
+    'nvidia-driver-libs.i686' \
+    'nvidia-persistenced' \
+    'nvidia-settings' \
+    'nvidia-driver-cuda' \
+    'nvidia-driver-cuda-libs.i686' \
+    'nvidia-container-toolkit' \
+    'libnvidia-ml.i686' \
+    'libnvidia-fbc' \
+    'libnvidia-fbc.i686' \
+    'libnvidia-gpucomp.i686' \
+    'libva-nvidia-driver' \
+)
 
 curl -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo -o /etc/yum.repos.d/nvidia-container-toolkit.repo
 sed -i 's/^gpgcheck=0/gpgcheck=1/' /etc/yum.repos.d/nvidia-container-toolkit.repo
@@ -124,7 +137,13 @@ if ! [ -f /etc/pki/tls/certs/ca-bundle.crt ]; then
     ln /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt
 fi
 
-dnf -y --setopt=install_weak_deps=False install --enable-repo='nvidia-container-toolkit' --enable-repo="${nvidia_repo}" "${nvidia_packages_list[@]}"
+dnf -y \
+    --setopt=install_weak_deps=False \
+    --setopt=exclude= \
+    install \
+    --enablerepo='nvidia-container-toolkit' \
+    --enablerepo="${nvidia_repo}" \
+    "${nvidia_packages_list[@]}"
 
 curl -L https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp -o nvidia-container.pp
 semodule -i nvidia-container.pp

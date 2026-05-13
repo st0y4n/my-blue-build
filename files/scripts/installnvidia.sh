@@ -106,10 +106,19 @@ if ! [ -f /etc/pki/tls/certs/ca-bundle.crt ]; then
     ln /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt
 fi
 
-dnf -y --setopt=install_weak_deps=False install \
-    --enable-repo='nvidia-container-toolkit' \
-    --enable-repo="${nvidia_repo}" \
+
+dnf -y \
+    --setopt=install_weak_deps=False \
+    --setopt=exclude= \
+    install \
+    --enablerepo='nvidia-container-toolkit' \
+    --enablerepo="${nvidia_repo}" \
     "${nvidia_packages_list[@]}"
+
+# dnf -y --setopt=install_weak_deps=False install \
+#     --enable-repo='nvidia-container-toolkit' \
+#     --enable-repo="${nvidia_repo}" \
+#     "${nvidia_packages_list[@]}"
 
 kmod_version=$(rpm -qa | grep akmod-nvidia | awk -F':' '{print $(NF)}' | awk -F'-' '{print $(NF-1)}')
 negativo_version=$(rpm -qa | grep nvidia-modprobe | awk -F':' '{print $(NF)}' | awk -F'-' '{print $(NF-1)}')
