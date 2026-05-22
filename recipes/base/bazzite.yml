@@ -16,3 +16,7 @@ modules:
         with-optional: true
         packages:
         - virtualization
+    install:
+      skip-unavailable: true
+      packages:
+        - sbsigntools
