@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: signing
+  - type: justfiles
+    validate: true
+    install: true
+    include:
+      - 30-secureboot.just
+  - type: files
+    files:
+      - source: base
+        destination: /
+  - type: dnf
+    group-install:
+        with-optional: true
+        packages:
+        - virtualization
