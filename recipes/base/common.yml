@@ -19,9 +19,6 @@ modules:
         - bootc-fetch-apply-updates.timer
 
   # Install stuff from negativo
-  - type: script
-    scripts:
-      - selinux.sh
   - type: dnf
     repos:
       nonfree: negativo17
@@ -191,5 +188,4 @@ modules:
     scripts:
       - install-appimage-thumbnailer.sh
       - install-winetricks.sh
-
   - type: brew
