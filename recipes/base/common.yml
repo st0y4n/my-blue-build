@@ -19,6 +19,9 @@ modules:
         - bootc-fetch-apply-updates.timer
 
   # Install stuff from negativo
+  - type: script
+    scripts:
+      - selinux.sh
   - type: dnf
     repos:
       nonfree: negativo17
