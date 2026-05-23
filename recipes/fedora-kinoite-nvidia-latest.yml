@@ -9,7 +9,6 @@ platforms:
 modules:
   - from-file: base/common.yml
   - from-file: base/kinoite.yml
-  - from-file: base/selinux.yml
   - from-file: base/nvidia.yml
   - type: os-release
     properties:
