@@ -88,10 +88,6 @@ modules:
     install:
       skip-unavailable: true
       packages:
-        - elfutils-libelf-devel
-        - gcc
-        - make
-        - kernel-devel
         - bootc
         - ublue-os-udev-rules
         - ublue-os-libvirt-workarounds
