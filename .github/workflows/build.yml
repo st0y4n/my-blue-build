@@ -51,7 +51,8 @@ jobs:
           - fedora-kinoite-gts.yml
           - fedora-kinoite-nvidia-gts.yml
           - fedora-kinoite-nvidia-open-gts.yml
-
+          - fedora-silverblue-nvidia-latest-cachy.yml
+          
           # Bazzite
           - bazzite-nvidia-kde.yml
     steps:

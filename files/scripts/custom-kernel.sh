@@ -6,7 +6,7 @@ echo "=== STARTING CACHYOS + SECURE BOOT SETUP ==="
 ##################################
 # 1. CACHY KERNEL SETUP
 ##################################
-KERNEL_TYPE="${1:-cachyos-lto}"
+KERNEL_TYPE="${1:-cachyos}"
 
 case "${KERNEL_TYPE}" in
 cachyos-lto)
