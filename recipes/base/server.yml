@@ -7,10 +7,17 @@ modules:
     install: true
     include:
       - 30-secureboot.just
+
   - type: files
     files:
       - source: base
         destination: /
+
+  - type: files
+    files:
+      - source: base-server
+        destination: /
+        
   - type: systemd
     system:
       masked:
