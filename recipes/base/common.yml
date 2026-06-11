@@ -174,7 +174,7 @@ modules:
         with-optional: true
         packages:
         - virtualization
-
+  
   - type: script
     env:
       CSFG: /usr/lib/systemd/system-generators/coreos-sulogin-force-generator

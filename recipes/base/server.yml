@@ -1,0 +1,94 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: signing
+  - type: justfiles
+    validate: true
+    install: true
+    include:
+      - 30-secureboot.just
+  - type: files
+    files:
+      - source: base
+        destination: /
+  - type: systemd
+    system:
+      masked:
+        - rpm-ostreed-automatic.timer
+      enabled:
+        - bootc-fetch-apply-updates.timer
+        # Enable your server web UI and VM engine automatically at build time!
+        - cockpit.socket
+        - libvirtd.service
+
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
+        - ublue-os/packages
+        - ublue-os/staging
+    install:
+      skip-unavailable: true
+      packages:
+        # Core Universal Blue overrides
+        - bootc
+        - ublue-os-udev-rules
+        - ublue-os-libvirt-workarounds # Highly recommended for VMs on uBlue
+        - fedora-repos-archive
+        
+        # System Admin & Server QOL Tools (Kept from your list)
+        - distrobox
+        - flatpak-spawn
+        - fuse
+        - fzf
+        - grub2-tools-extra
+        - htop
+        - just
+        - lshw
+        - net-tools
+        - nvme-cli
+        - nvtop
+        - openssl
+        - powerstat
+        - smartmontools
+        - squashfs-tools
+        - symlinks
+        - tcpdump
+        - tmux
+        - traceroute
+        - vim
+        - wireguard-tools
+        - zstd
+        - sbsign
+
+        # Hardware Security
+        - pam-u2f
+        - pam_yubico
+        - pamu2fcfg
+        - yubikey-manager
+        
+        # --- NEW: The Headless Server Stack ---
+        - cockpit
+        - cockpit-machines
+        - cockpit-podman
+        - cockpit-storaged
+        - cockpit-networkmanager
+        - libvirt
+        - qemu-kvm
+        - virt-install
+
+    remove:
+      auto-remove: false
+      packages:
+        - fedora-flathub-remote
+        - fedora-third-party
+        - fedora-workstation-repositories
+
+  - type: script
+    env:
+      CSFG: /usr/lib/systemd/system-generators/coreos-sulogin-force-generator
+    snippets:
+      # use CoreOS' generator for emergency/rescue boot
+      # see detail: https://github.com/ublue-os/main/issues/653
+      - curl -sSLo ${CSFG} https://raw.githubusercontent.com/coreos/fedora-coreos-config/refs/heads/stable/overlay.d/05core/usr/lib/systemd/system-generators/coreos-sulogin-force-generator
+      - chmod +x ${CSFG}

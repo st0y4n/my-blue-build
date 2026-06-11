@@ -1,0 +1,12 @@
+name: base-images/ublue-server
+description: Ublue image
+base-image: ghcr.io/ublue-os/base-main
+image-version: 44
+platforms:
+- linux/amd64
+modules:
+- from-file: base/server.yml
+- type: os-release
+  properties:
+    PRETTY_NAME: Ublue Server
+- from-file: base/post-build.yml
