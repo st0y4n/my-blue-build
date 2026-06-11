@@ -18,15 +18,6 @@ modules:
       - source: base-server
         destination: /
         
-  - type: systemd
-    system:
-      masked:
-        - rpm-ostreed-automatic.timer
-      enabled:
-        - bootc-fetch-apply-updates.timer
-        # Enable your server web UI and VM engine automatically at build time!
-        - cockpit.socket
-        - libvirtd.service
 
   - type: dnf
     repos:
@@ -90,6 +81,16 @@ modules:
         - fedora-flathub-remote
         - fedora-third-party
         - fedora-workstation-repositories
+
+  - type: systemd
+    system:
+      masked:
+        - rpm-ostreed-automatic.timer
+      enabled:
+        - bootc-fetch-apply-updates.timer
+        # Enable your server web UI and VM engine automatically at build time!
+        - cockpit.socket
+        - libvirtd.service
 
   - type: script
     env:
