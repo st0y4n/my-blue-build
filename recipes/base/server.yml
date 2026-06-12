@@ -71,6 +71,7 @@ modules:
         - cockpit-podman
         - cockpit-storaged
         - cockpit-networkmanager
+        - cockpit-selinux
         - libvirt
         - qemu-kvm
         - virt-install
