@@ -155,7 +155,7 @@ modules:
         - libglvnd-opengl.i686
         - snapper
         - btrfs-assistant
-        
+        - matugen
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
