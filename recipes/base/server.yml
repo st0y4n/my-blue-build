@@ -58,6 +58,7 @@ modules:
         - wireguard-tools
         - zstd
         - sbsign
+        - snapper
 
         # Hardware Security
         - pam-u2f
