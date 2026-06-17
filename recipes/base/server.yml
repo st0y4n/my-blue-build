@@ -76,6 +76,7 @@ modules:
         - libvirt
         - qemu-kvm
         - virt-install
+        - podman-compose
 
     remove:
       auto-remove: false

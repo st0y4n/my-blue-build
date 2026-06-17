@@ -156,6 +156,7 @@ modules:
         - snapper
         - btrfs-assistant
         - matugen
+        - podman-compose
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
