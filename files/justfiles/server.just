@@ -2,8 +2,121 @@ server-setup:
     #!/usr/bin/bash
     sudo loginctl enable-linger $USER
     systemctl --user enable --now podman-restart.service
+    echo "net.ipv4.ip_unprivileged_port_start=69" | sudo tee /etc/sysctl.d/90-unprivileged-ports.conf
+    sudo sysctl --system
 
 server-remove:
     #!/usr/bin/bash
     sudo loginctl disable-linger $USER
     systemctl --user disable --now podman-restart.service
+    sudo rm /etc/sysctl.d/90-unprivileged-ports.conf
+    sudo sysctl --system
+
+
+luks-bypass:
+    #!/usr/bin/bash
+    set -euo pipefail
+
+    echo "Discovering system partition details..."
+    
+    # 1. Discover the true LUKS UUID from the hardware (bypassing crypttab entirely)
+    LUKS_UUID=$(sudo blkid --match-token TYPE=crypto_LUKS -s UUID -o value | head -n 1)
+    if [ -z "${LUKS_UUID}" ]; then
+        echo "Error: Could not find an active LUKS partition on this system" >&2
+        exit 1
+    fi
+    echo " -> Found backing LUKS volume UUID: ${LUKS_UUID}"
+
+    # 2. Extract the unencrypted /boot partition's UUID cleanly
+    BOOT_UUID=$(findmnt -n -o UUID /boot)
+    echo " -> Found /boot partition UUID: ${BOOT_UUID}"
+
+    # 3. Securely generate the 512-byte keyfile
+    echo "Generating secure 512-byte keyfile..."
+    sudo dd if=/dev/urandom of=/boot/luks.key bs=512 count=1 status=none
+    sudo chmod 0400 /boot/luks.key
+
+    # 4. Enroll the generated keyfile
+    echo "Enrolling the new keyfile into LUKS (You may be prompted for your current LUKS password)..."
+    sudo cryptsetup luksAddKey "/dev/disk/by-uuid/${LUKS_UUID}" /boot/luks.key
+
+    # 5 & 6. Combined Safety and Injection Phase (Truly Idempotent)
+    echo "Atomically updating rpm-ostree kernel arguments..."
+    
+    # Hunt down any existing LUKS key arguments so we can delete them precisely
+    # (The || true prevents the script from crashing if it doesn't find any old keys)
+    OLD_KEY=$(rpm-ostree kargs | tr ' ' '\n' | grep '^rd.luks.key=' || true)
+    OLD_OPT=$(rpm-ostree kargs | tr ' ' '\n' | grep '^rd.luks.options=.*keyfile-timeout' || true)
+
+    # Safely build the command using a Bash Array
+    KARGS_CMD=(sudo rpm-ostree kargs)
+    
+    if [ -n "$OLD_KEY" ]; then
+        KARGS_CMD+=(--delete-if-present="$OLD_KEY")
+    fi
+    if [ -n "$OLD_OPT" ]; then
+        KARGS_CMD+=(--delete-if-present="$OLD_OPT")
+    fi
+    
+    # Append the fresh parameters
+    KARGS_CMD+=(--append="rd.luks.key=${LUKS_UUID}=/luks.key:UUID=${BOOT_UUID}")
+    KARGS_CMD+=(--append="rd.luks.options=${LUKS_UUID}=keyfile-timeout=10s")
+
+    # Execute the dynamically built command
+    "${KARGS_CMD[@]}"
+
+    echo "Done! Please verify with 'rpm-ostree kargs' then reboot to test your hands-free boot."
+
+
+luks-restore:
+    #!/usr/bin/bash
+    set -euo pipefail
+
+    echo "Starting LUKS auto-unlock removal process..."
+
+    # 1. Discover the true LUKS UUID from the hardware
+    LUKS_UUID=$(sudo blkid --match-token TYPE=crypto_LUKS -s UUID -o value | head -n 1)
+    if [ -z "${LUKS_UUID}" ]; then
+        echo "Error: Could not find an active LUKS partition on this system." >&2
+        exit 1
+    fi
+    echo " -> Found backing LUKS volume UUID: ${LUKS_UUID}"
+
+    # 2. Atomically strip the kernel arguments
+    echo "Removing LUKS auto-unlock kernel arguments..."
+    OLD_KEY=$(rpm-ostree kargs | tr ' ' '\n' | grep '^rd.luks.key=' || true)
+    OLD_OPT=$(rpm-ostree kargs | tr ' ' '\n' | grep '^rd.luks.options=.*keyfile-timeout' || true)
+
+    KARGS_CMD=(sudo rpm-ostree kargs)
+    if [ -n "$OLD_KEY" ]; then
+        KARGS_CMD+=(--delete-if-present="$OLD_KEY")
+    fi
+    if [ -n "$OLD_OPT" ]; then
+        KARGS_CMD+=(--delete-if-present="$OLD_OPT")
+    fi
+
+    # Only run the rpm-ostree command if there are actually keys to delete
+    if [ ${#KARGS_CMD[@]} -gt 2 ]; then
+        "${KARGS_CMD[@]}"
+        echo " -> Kernel arguments successfully queued for removal."
+    else
+        echo " -> No auto-unlock kernel arguments found. Skipping."
+    fi
+
+    # 3. Unbind the keyfile from the LUKS drive and destroy it
+    if [ -f /boot/luks.key ]; then
+        echo "Unbinding the keyfile from the LUKS partition slots..."
+        # luksRemoveKey safely finds the specific slot matching THIS file and wipes it.
+        # It will leave your normal typed passphrase completely untouched.
+        sudo cryptsetup luksRemoveKey "/dev/disk/by-uuid/${LUKS_UUID}" /boot/luks.key
+        
+        echo "Securely destroying the physical keyfile..."
+        # Using 'shred' instead of 'rm' overwrites the data with zeros before deleting it,
+        # ensuring no one can recover the file from your unencrypted /boot drive.
+        sudo shred -u /boot/luks.key
+        echo " -> Keyfile destroyed."
+    else
+        echo " -> Keyfile /boot/luks.key not found. Skipping LUKS slot removal."
+    fi
+
+    echo "Reversal complete! Please reboot. The system will halt at the password screen."
