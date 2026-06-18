@@ -7,6 +7,7 @@ modules:
     install: true
     include:
       - 30-secureboot.just
+      - server.just
 
   - type: files
     files:
