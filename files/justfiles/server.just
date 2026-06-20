@@ -2,6 +2,7 @@ server-setup:
     #!/usr/bin/bash
     sudo loginctl enable-linger $USER
     systemctl --user enable --now podman-restart.service
+    systemctl --user enable --now podman.socket
     echo "net.ipv4.ip_unprivileged_port_start=69" | sudo tee /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
@@ -9,6 +10,7 @@ server-remove:
     #!/usr/bin/bash
     sudo loginctl disable-linger $USER
     systemctl --user disable --now podman-restart.service
+    systemctl --user disable --now podman.socket
     sudo rm /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
@@ -120,3 +122,60 @@ luks-restore:
     fi
 
     echo "Reversal complete! Please reboot. The system will halt at the password screen."
+
+
+configure-cdrom-on:
+    #!/usr/bin/bash
+
+    # Prevent script from running as root directly; sudo inside handles the escalation safely
+    if [ "$EUID" -eq 0 ]; then
+        echo "Please run this script as a normal user (without sudo). It will prompt for privileges."
+        exit 1
+    fi
+
+    echo "Unlocking CD-ROM door at the kernel level..."
+    echo "dev.cdrom.lock=0" | sudo tee /etc/sysctl.d/99-cdrom.conf > /dev/null
+    sudo sysctl --system
+
+    echo "Creating udev hardware rules using native systemd-mount..."
+    sudo tee /etc/udev/rules.d/99-cdrom.rules > /dev/null << 'EOF'
+    # Use systemd-mount to safely create a transient mount unit on insertion
+    ACTION=="change", SUBSYSTEM=="block", KERNEL=="sr0", ENV{ID_CDROM_MEDIA}=="1", RUN+="/usr/bin/systemd-mount --collect --no-block --options=ro /dev/sr0 /var/mnt/cdrom"
+
+    # Use systemd-mount to cleanly destroy the transient mount unit on ejection
+    ACTION=="change", SUBSYSTEM=="block", KERNEL=="sr0", ENV{ID_CDROM_MEDIA}!="1", RUN+="/usr/bin/systemd-mount --umount /var/mnt/cdrom"
+    EOF
+
+    echo "Reloading and triggering udev..."
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+
+    echo "Done! CD-ROM Event-Driven Mounting is now CONFIGURED and ACTIVE."
+
+
+configure-cdrom-off:
+    #!/usr/bin/bash
+
+    # Prevent script from running as root directly; sudo inside handles the escalation safely
+    if [ "$EUID" -eq 0 ]; then
+        echo "Please run this script as a normal user (without sudo). It will prompt for privileges."
+        exit 1
+    fi
+
+    echo "Restoring default kernel CD-ROM lock..."
+    sudo rm -f /etc/sysctl.d/99-cdrom.conf
+    # Explicitly force the lock back on in active memory
+    sudo sysctl -w dev.cdrom.lock=1
+
+    echo "Safely unmounting the drive..."
+    # Attempt to gracefully stop the transient systemd unit if it is currently running
+    sudo systemd-mount --umount /var/mnt/cdrom 2>/dev/null || true
+    # Fallback lazy unmount just to guarantee the directory is completely free
+    sudo umount -l /var/mnt/cdrom 2>/dev/null || true
+
+    echo "Removing udev hardware rules..."
+    sudo rm -f /etc/udev/rules.d/99-cdrom.rules
+
+    echo "Reloading and triggering udev to apply clean state..."
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+
+    echo "Done! CD-ROM Event-Driven Mounting has been REMOVED."
