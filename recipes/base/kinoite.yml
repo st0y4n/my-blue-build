@@ -21,6 +21,7 @@ modules:
         - ksshaskpass
         - qt6-qtimageformats
         - kvantum
+        - breeze-gtk
       exclude:
         - ffmpegthumbnailer
         - plasma-discover-rpm-ostree
