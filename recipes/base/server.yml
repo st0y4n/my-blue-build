@@ -76,6 +76,8 @@ modules:
         - cockpit-selinux
         - cockpit-ostree
         - cockpit-files
+        - cockpit-sosreport
+        - cockpit-kdump
         - libvirt
         - qemu-kvm
         - virt-install
