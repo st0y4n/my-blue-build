@@ -74,6 +74,8 @@ modules:
         - cockpit-storaged
         - cockpit-networkmanager
         - cockpit-selinux
+        - cockpit-ostree
+        - cockpit-files
         - libvirt
         - qemu-kvm
         - virt-install
