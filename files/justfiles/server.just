@@ -91,7 +91,7 @@ luks-restore:
         # luksRemoveKey safely finds the specific slot matching THIS file and wipes it.
         # It will leave your normal typed passphrase completely untouched.
         sudo cryptsetup luksRemoveKey "/dev/disk/by-uuid/${LUKS_UUID}" /boot/luks.key
-        
+
         echo "Securely destroying the physical keyfile..."
         # Using 'shred' instead of 'rm' overwrites the data with zeros before deleting it,
         # ensuring no one can recover the file from your unencrypted /boot drive.
