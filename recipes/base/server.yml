@@ -82,6 +82,7 @@ modules:
         - qemu-kvm
         - virt-install
         - podman-compose
+        - ansible
 
     remove:
       auto-remove: false
