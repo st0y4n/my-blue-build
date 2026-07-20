@@ -1,24 +1,25 @@
 server-setup:
     #!/usr/bin/bash
     sudo systemctl daemon-reload
+    systemctl --user daemon-reload
     sudo loginctl enable-linger $USER
     systemctl --user enable --now podman-restart.service
     systemctl --user enable --now podman.socket
-    sudo systemctl enable --now podman-auto-update.timer
     systemctl --user enable --now podman-auto-update.timer
+    sudo systemctl enable --now podman-auto-update.timer
     sudo systemctl enable --now bootc-fetch-apply-updates.timer
     echo "net.ipv4.ip_unprivileged_port_start=69" | sudo tee /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
 server-remove:
     #!/usr/bin/bash
-    sudo systemctl daemon-reload
-    sudo loginctl disable-linger $USER
     systemctl --user disable --now podman-restart.service
     systemctl --user disable --now podman.socket
-    sudo systemctl disable --now podman-auto-update.timer
     systemctl --user disable --now podman-auto-update.timer
-    sudo rm /etc/sysctl.d/90-unprivileged-ports.conf
+    sudo systemctl disable --now podman-auto-update.timer
+    sudo systemctl disable --now bootc-fetch-apply-updates.timer
+    sudo loginctl disable-linger $USER
+    sudo rm -f /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
 luks-bypass:
