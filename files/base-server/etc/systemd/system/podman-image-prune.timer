@@ -1,0 +1,10 @@
+[Unit]
+Description=Schedule Podman Image Prune
+
+[Timer]
+OnCalendar=Sun *-*-* 05:00:00
+Persistent=true
+Unit=podman-image-prune.service
+
+[Install]
+WantedBy=timers.target
