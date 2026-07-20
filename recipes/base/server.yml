@@ -26,6 +26,7 @@ modules:
       copr:
         - ublue-os/packages
         - ublue-os/staging
+        - lilay/topgrade
     install:
       skip-unavailable: true
       packages:
@@ -83,6 +84,7 @@ modules:
         - virt-install
         - podman-compose
         - ansible
+        - topgrade
 
     remove:
       auto-remove: false
