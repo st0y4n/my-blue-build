@@ -3,6 +3,20 @@ server-setup:
     sudo loginctl enable-linger $USER
     systemctl --user enable --now podman-restart.service
     systemctl --user enable --now podman.socket
+    sudo systemctl enable --now podman-auto-update.timer
+    systemctl --user enable --now podman-auto-update.timer
+    sudo mkdir -p /etc/systemd/system/bootc-fetch-apply-updates.timer.d/
+    sudo tee /etc/systemd/system/bootc-fetch-apply-updates.timer.d/override.conf > /dev/null << 'EOF'
+    [Timer]
+    OnBootSec=
+    OnUnitInactiveSec=
+    OnCalendar=
+    OnCalendar=Sun *-*-* 04:00:00
+    Persistent=true
+    EOF
+    sudo systemctl daemon-reload
+    sudo systemctl restart bootc-fetch-apply-updates.timer
+    sudo systemctl enable --now bootc-fetch-apply-updates.timer
     echo "net.ipv4.ip_unprivileged_port_start=69" | sudo tee /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
@@ -11,6 +25,8 @@ server-remove:
     sudo loginctl disable-linger $USER
     systemctl --user disable --now podman-restart.service
     systemctl --user disable --now podman.socket
+    sudo systemctl disable --now podman-auto-update.timer
+    systemctl --user disable --now podman-auto-update.timer
     sudo rm /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
 
