@@ -6,6 +6,8 @@ server-setup:
     systemctl --user enable --now podman-restart.service
     systemctl --user enable --now podman.socket
     systemctl --user enable --now podman-auto-update.timer
+    systemctl --user enable --now podman-system-prune.timer
+    sudo systemctl enable --now podman-system-prune.timer
     sudo systemctl enable --now podman-auto-update.timer
     sudo systemctl enable --now bootc-fetch-apply-updates.timer
     echo "net.ipv4.ip_unprivileged_port_start=69" | sudo tee /etc/sysctl.d/90-unprivileged-ports.conf
@@ -16,8 +18,10 @@ server-remove:
     systemctl --user disable --now podman-restart.service
     systemctl --user disable --now podman.socket
     systemctl --user disable --now podman-auto-update.timer
+    systemctl --user disable --now podman-system-prune.timer
     sudo systemctl disable --now podman-auto-update.timer
     sudo systemctl disable --now bootc-fetch-apply-updates.timer
+    sudo systemctl disable --now podman-system-prune.timer
     sudo loginctl disable-linger $USER
     sudo rm -f /etc/sysctl.d/90-unprivileged-ports.conf
     sudo sysctl --system
