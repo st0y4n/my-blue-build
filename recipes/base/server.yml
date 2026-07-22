@@ -99,7 +99,14 @@ modules:
         - bootc-fetch-apply-updates.timer
         # Enable your server web UI and VM engine automatically at build time!
         - cockpit.socket
-        - libvirtd.service
+        - virtqemud.socket
+        - virtnetworkd.socket
+        - virtstoraged.socket
+        - virtsecretd.socket
+        - virtnodedevd.socket
+        - virtnwfilterd.socket
+        - virtproxyd.socket
+        - virtproxyd-ro.socket
 
   - type: script
     env:
