@@ -157,6 +157,7 @@ modules:
         - btrfs-assistant
         - matugen
         - podman-compose
+        - ansible
       exclude:
         - google-noto-sans-cjk-vf-fonts
         - default-fonts-cjk-sans
