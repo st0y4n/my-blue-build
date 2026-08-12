@@ -32,11 +32,11 @@ jobs:
         run: |
           # 1. Define files to sync explicitly
           cat << 'EOF' > /tmp/sync_files.txt
-          scripts/installnvidia.sh
-          scripts/sign-check.sh
-          scripts/signkernel.sh
-          scripts/signmodules.sh
-          scripts/install-appimage-thumbnailer.sh
+          files/scripts/installnvidia.sh
+          files/scripts/sign-check.sh
+          files/scripts/signkernel.sh
+          files/scripts/signmodules.sh
+          files/scripts/install-appimage-thumbnailer.sh
           EOF
 
           # Copy exact files
