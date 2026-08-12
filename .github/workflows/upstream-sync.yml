@@ -1,0 +1,63 @@
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+
+      - name: Clone upstream repository
+        run: |
+          rm -rf /tmp/upstream
+          git clone --depth=1 --branch main https://github.com/blue-build/base-images.git /tmp/upstream
+
+      - name: Sync selective files and folders from upstream
+        run: |
+          # 1. Define files to sync explicitly
+          cat << 'EOF' > /tmp/sync_files.txt
+          scripts/installnvidia.sh
+          scripts/sign-check.sh
+          scripts/signkernel.sh
+          scripts/signmodules.sh
+          scripts/install-appimage-thumbnailer.sh
+          EOF
+
+          # Copy exact files
+          rsync -a --files-from=/tmp/sync_files.txt /tmp/upstream/ ./
+
+          # 2. Optionally sync entire directories explicitly (with --delete to clean up upstream removals in that directory)
+          # rsync -a --delete /tmp/upstream/specific-folder/ ./specific-folder/
+          rsync -a --delete /tmp/upstream/files/nvidia/ ./files/nvidia/
+
+      - name: Commit and push if changed
+        env:
+          SYNC_TOKEN: ${{ secrets.PAT }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Repository is identical to target upstream files. Exiting."
+            exit 0
+          fi
+
+          git add -A
+          git commit -m "Automated selective sync from MANCrimSon"
+          git push https://${{ github.actor }}:${SYNC_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
