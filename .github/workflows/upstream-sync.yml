@@ -37,6 +37,7 @@ jobs:
           files/scripts/signkernel.sh
           files/scripts/signmodules.sh
           files/scripts/install-appimage-thumbnailer.sh
+          recipes/base/nvidia.yml
           EOF
 
           # Copy exact files
