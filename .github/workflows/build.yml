@@ -69,9 +69,54 @@ jobs:
           KERNEL_SIGNING_SECRET: ${{ secrets.KERNEL_SIGNING_SECRET }}
         run: echo "${KERNEL_SIGNING_SECRET}" | base64 -d > MOK.priv
 
+      - name: Extract Image Info from Recipe
+        id: extract
+        shell: bash
+        run: |
+          RECIPE_FILE="${{ matrix.recipe }}"
+          
+          # 1. Locate the file
+          if [ -f "recipes/$RECIPE_FILE" ]; then 
+            PATH_TO_RECIPE="recipes/$RECIPE_FILE"
+          elif [ -f "config/$RECIPE_FILE" ]; then 
+            PATH_TO_RECIPE="config/$RECIPE_FILE"
+          elif [ -f "$RECIPE_FILE" ]; then
+            PATH_TO_RECIPE="$RECIPE_FILE"
+          else
+            echo "Error: Cannot find recipe file $RECIPE_FILE"
+            exit 1
+          fi
+          
+          # 2. Parse YAML using yq 
+          BASE_NAME=$(yq -e '.base-image' "$PATH_TO_RECIPE")
+          TARGET_NAME=$(yq -e '.name' "$PATH_TO_RECIPE")
+          VERSION=$(yq -e '.image-version // "latest"' "$PATH_TO_RECIPE")
+          
+          # 3. Construct proper URLs
+          if [[ "$BASE_NAME" == *":"* ]]; then
+            BASE_IMAGE="$BASE_NAME"
+          else
+            BASE_IMAGE="${BASE_NAME}:${VERSION}"
+          fi
+          
+          # GHCR requires repository owners to be entirely lowercase
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          TARGET_IMAGE="ghcr.io/${OWNER}/${TARGET_NAME}:${VERSION}"
+          
+          echo "base=$BASE_IMAGE" >> $GITHUB_OUTPUT
+          echo "target=$TARGET_IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Check if base image updated
+        id: check
+        continue-on-error: true
+        uses: lucacome/docker-image-update-checker@v3
+        with:
+          base-image: ${{ steps.extract.outputs.base }}
+          image: ${{ steps.extract.outputs.target }}
+
       # the build is fully handled by the reusable github action
       - name: Build Custom Image
-        # uses: blue-build/github-action@3cd0c2835e691b87a7eb19261a6aee77a56169e2 #v1.10
+        if: github.event_name != 'schedule' || steps.check.outputs.needs-updating == 'true' || steps.check.outcome == 'failure'
         uses: blue-build/github-action@main
         with:
           recipe: ${{ matrix.recipe }}
@@ -83,6 +128,4 @@ jobs:
           skip_checkout: true
           chunkah: true
           max_layers: 64
-
-          # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
