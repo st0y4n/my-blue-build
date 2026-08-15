@@ -2,11 +2,6 @@
 # yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
 modules:
   - type: signing
-  - type: justfiles
-    validate: true
-    install: true
-    include:
-      - 30-secureboot.just
   - type: files
     files:
       - source: base
@@ -16,7 +11,18 @@ modules:
         with-optional: true
         packages:
         - virtualization
-    install:
-      skip-unavailable: true
-      packages:
-        - sbsigntools
+  - type: systemd
+    system:
+      masked:
+        - rpm-ostreed-automatic.timer
+      enabled:
+        - bootc-fetch-apply-updates.timer
+        # Enable your server web UI and VM engine automatically at build time!
+        - virtqemud.socket
+        - virtnetworkd.socket
+        - virtstoraged.socket
+        - virtsecretd.socket
+        - virtnodedevd.socket
+        - virtnwfilterd.socket
+        - virtproxyd.socket
+        - virtproxyd-ro.socket
