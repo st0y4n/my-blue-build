@@ -9,4 +9,3 @@ modules:
 - type: os-release
   properties:
     PRETTY_NAME: Ublue Server
-- from-file: base/post-build.yml
