@@ -11,4 +11,3 @@ modules:
   - type: os-release
     properties:
       PRETTY_NAME: Bazzite (st0y4n)
-  - from-file: base/post-build.yml
