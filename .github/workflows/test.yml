@@ -9,7 +9,7 @@ jobs:
       fail-fast: false 
       matrix:
         recipe:
-          # Limit to 1 or 2 files for testing to avoid spamming jobs
+          # Limit to 2 files for testing to avoid spamming jobs
           - fedora-kinoite-latest.yml 
           - bazzite-nvidia-kde.yml
     steps:
@@ -21,7 +21,7 @@ jobs:
         run: |
           RECIPE_FILE="${{ matrix.recipe }}"
           
-          # Handle potential directory paths
+          # Handle potential directory paths dynamically
           if [ -f "recipes/$RECIPE_FILE" ]; then 
             PATH_TO_RECIPE="recipes/$RECIPE_FILE"
           elif [ -f "config/$RECIPE_FILE" ]; then 
@@ -57,8 +57,8 @@ jobs:
           TARGET_IMAGE="docker://${{ steps.extract.outputs.target }}"
           
           echo "Checking Base: $BASE_IMAGE"
-          echo "Checking Target: $TARGET_IMAGE
-          
+          echo "Checking Target: $TARGET_IMAGE"
+
           # 1. Get Upstream Base Creation Time
           UPSTREAM_TIME=$(skopeo inspect --format '{{.Created}}' "$BASE_IMAGE" 2>/dev/null)
           if [ -z "$UPSTREAM_TIME" ]; then
