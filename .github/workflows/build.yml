@@ -2,7 +2,7 @@ name: bluebuild
 on:
   schedule:
     - cron:
-        "00 03 * * *" # build at 03:00 UTC every day
+        "45 03 * * *" # build at 03:00 UTC every day
 
   pull_request:
   workflow_dispatch: # allow manually triggering builds
