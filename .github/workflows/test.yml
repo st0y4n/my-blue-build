@@ -57,24 +57,37 @@ jobs:
           TARGET_IMAGE="docker://${{ steps.extract.outputs.target }}"
           
           echo "Checking Base: $BASE_IMAGE"
-          echo "Checking Target: $TARGET_IMAGE"
-
+          echo "Checking Target: $TARGET_IMAGE
+          
+          # 1. Get Upstream Base Creation Time
           UPSTREAM_TIME=$(skopeo inspect --format '{{.Created}}' "$BASE_IMAGE" 2>/dev/null)
           if [ -z "$UPSTREAM_TIME" ]; then
+            echo "Error: Could not fetch upstream image metadata."
             echo "needs-updating=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          UP_EPOCH=$(date -d "$UPSTREAM_TIME" +%s)
+          
+          # FIX: Strip the redundant " UTC" string so GNU date can parse it
+          CLEAN_UPSTREAM="${UPSTREAM_TIME/ UTC/}"
+          UP_EPOCH=$(date -d "$CLEAN_UPSTREAM" +%s)
 
+          # 2. Get Target Image Creation Time
           TARGET_TIME=$(skopeo inspect --format '{{.Created}}' "$TARGET_IMAGE" 2>/dev/null || echo "none")
 
+          # 3. Compare Timestamps
           if [ "$TARGET_TIME" = "none" ]; then
+            echo "Target image not found (likely first run). Triggering build."
             echo "needs-updating=true" >> $GITHUB_OUTPUT
           else
-            TG_EPOCH=$(date -d "$TARGET_TIME" +%s)
+            # FIX: Strip the redundant " UTC" string here as well
+            CLEAN_TARGET="${TARGET_TIME/ UTC/}"
+            TG_EPOCH=$(date -d "$CLEAN_TARGET" +%s)
+            
             if [ "$UP_EPOCH" -gt "$TG_EPOCH" ]; then
+              echo "Upstream base is newer. Triggering build."
               echo "needs-updating=true" >> $GITHUB_OUTPUT
             else
+              echo "Upstream base is older or equal. No build needed."
               echo "needs-updating=false" >> $GITHUB_OUTPUT
             fi
           fi
