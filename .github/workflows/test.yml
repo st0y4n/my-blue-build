@@ -13,7 +13,7 @@ jobs:
           - fedora-kinoite-latest.yml 
           - bazzite-nvidia-kde.yml
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Extract Image Info from Recipe
         id: extract
