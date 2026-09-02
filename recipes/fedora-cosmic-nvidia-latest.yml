@@ -7,7 +7,7 @@ description: Reference implementation and base images for BlueBuild.
 platforms:
   - linux/amd64
 modules:
-  - from-file: base/common.yml
+  - from-file: base/bazzite.yml
   - type: os-release
     properties:
       PRETTY_NAME: BlueBuild OS for Nvidia - COSMIC (FROM Fedora cosmic-atomic)
