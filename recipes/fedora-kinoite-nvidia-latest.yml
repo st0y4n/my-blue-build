@@ -9,8 +9,6 @@ platforms:
 modules:
   - from-file: base/common.yml
   - from-file: base/kinoite.yml
-  - from-file: base/nvidia.yml
   - type: os-release
     properties:
       PRETTY_NAME: BlueBuild OS for Nvidia - Kinoite (FROM Fedora Kinoite)
-  - from-file: base/post-build.yml
