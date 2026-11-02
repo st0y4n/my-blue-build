@@ -160,7 +160,6 @@ jobs:
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
           verify_install: true
-          use_unstable_cli: true
           skip_checkout: true
           chunkah: true
           max_layers: 64
