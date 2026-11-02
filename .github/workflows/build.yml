@@ -159,7 +159,6 @@ jobs:
           cosign_private_key: ${{ secrets.COSIGN_PRIVATE_KEY }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
-          verify_install: true
           skip_checkout: true
           chunkah: true
           max_layers: 64
