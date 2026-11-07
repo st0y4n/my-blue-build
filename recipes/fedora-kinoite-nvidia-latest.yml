@@ -3,7 +3,7 @@
 name: base-images/fedora-kinoite-nvidia
 description: Reference implementation and base images for BlueBuild.
 base-image: ghcr.io/blue-build/base-images/fedora-kinoite-nvidia
-image-version: 44
+image-version: 45
 platforms:
   - linux/amd64
 modules:
